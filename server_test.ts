@@ -3,7 +3,7 @@ import { assertEquals } from './test_deps.ts';
 const { test } = Deno;
 
 test({
-  name: 'server test',
+  name: 'json server test',
   fn: async () => {
     const server = await jsonServer('./example/db.json');
     const response = await fetch('http://localhost:8000/profile');
