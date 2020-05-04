@@ -5,21 +5,23 @@ const { readTextFile } = Deno;
 const handleRequest = (db: Record<string, unknown>) => (
   request: ServerRequest
 ) => {
-  const firstPart = request.url.split('/')[1];
-  console.log(request.url, firstPart, db[firstPart]);
-  if (!(firstPart in db)) {
-    request.respond({ body: `${firstPart} not found in db.json!` });
-    return;
-  } else {
-    const headers = new Headers({ 'Content-Type': 'application/json' });
+  const route = request.url.split('/')[1];
+  console.log(request.url, route, db[route]);
+  if (route && !(route in db)) {
     request.respond({
-      body: JSON.stringify(db[firstPart]),
-      headers: headers,
+      body: `${route} not found in db.json!`,
+      status: 404,
     });
+    return;
   }
+  const headers = new Headers({ 'Content-Type': 'application/json' });
+  request.respond({
+    body: JSON.stringify(route ? db[route] : db, null, 2),
+    headers: headers,
+  });
 };
 
-const loadDatabase = async (dbPath: string) => {
+export const loadDatabase = async (dbPath: string) => {
   const dbString = await readTextFile(dbPath);
   return JSON.parse(dbString);
 };
