@@ -1,6 +1,6 @@
 # json-server
 
-![CI](https://github.com/magnattic/json-server/workflows/CI/badge.svg)
+[![CI](https://github.com/magnattic/json-server/workflows/CI/badge.svg)](https://github.com/magnattic/json-server/actions?query=workflow%3ACI)
 
 Simple zero-code fake API server for deno, delivering data from a JSON file. Inspired by [typicode/json-server](https://github.com/typicode/json-server)
 
