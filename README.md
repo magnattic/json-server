@@ -47,3 +47,9 @@ returns the post with id 2
 > localhost:8000/posts/2/title
 
 returns the title of post with id 2
+
+## Upcoming features
+
+- [ ] deliver from db.ts
+- [ ] watch mode to update on changes
+- [ ] filter by query params
