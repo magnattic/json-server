@@ -9,17 +9,6 @@ const assertJSON = async (actual: Response, expected: unknown) => {
 };
 
 test({
-  name: 'load profile from db',
-  fn: async () => {
-    const server = await jsonServer('./example/db.json');
-    const response = await fetch('http://localhost:8000/profile');
-
-    await assertJSON(response, { hello: 'world' });
-    server.close();
-  },
-});
-
-test({
   name: 'load whole db',
   fn: async () => {
     const db = await loadDatabase('./example/db.json');
@@ -41,6 +30,35 @@ test({
     const response = await fetch('http://localhost:8000');
 
     await assertJSON(response, db);
+    server.close();
+  },
+});
+
+test({
+  name: 'load profile from db',
+  fn: async () => {
+    const server = await jsonServer('./example/db.json');
+    const response = await fetch('http://localhost:8000/profile');
+
+    await assertJSON(response, { hello: 'world' });
+    server.close();
+  },
+});
+
+test({
+  name: 'route by id',
+  fn: async () => {
+    const db = {
+      posts: [
+        { id: 1, title: 'Yucatan' },
+        { id: 2, title: 'Alice in Denoland' },
+      ],
+    };
+    const server = await jsonServer(db);
+
+    const response = await fetch('http://localhost:8000/posts/2');
+
+    await assertJSON(response, db.posts[1]);
     server.close();
   },
 });
