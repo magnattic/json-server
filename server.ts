@@ -33,6 +33,7 @@ export const jsonServer = async (
   dbPathOrObject: string | Object = './db.json',
   port = 8000
 ) => {
+  console.log(dbPathOrObject);
   const db = isString(dbPathOrObject)
     ? await loadDatabase(dbPathOrObject as string)
     : dbPathOrObject;
