@@ -1,4 +1,4 @@
-import { ServerRequest, reduce } from './deps.ts';
+import { ServerRequest } from './deps.ts';
 import { listenAndServe } from './listenAndServe.ts';
 const { readTextFile } = Deno;
 
@@ -6,17 +6,14 @@ const handleRequest = (db: Record<string, unknown>) => (
   request: ServerRequest
 ) => {
   const [, ...routePaths] = request.url.split('/');
-  console.log('route', request.url, routePaths);
 
   const resource = routePaths.reduce<Record<string, unknown>>(
     (subDB, routePart) => {
-      console.log('yada', subDB, routePart);
       if (routePart == null || routePart === '') {
         return subDB;
       }
       const id = Number(routePart);
       if (Array.isArray(subDB) && id !== NaN) {
-        console.log('yes', id);
         return (subDB as { id: number }[]).find(
           (item) => item.id === id
         ) as Record<string, unknown>;
