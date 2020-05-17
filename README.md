@@ -1,4 +1,4 @@
-https://github.com/magnattic/json-server/workflows/CI/badge.svg
+![CI](https://github.com/magnattic/json-server/workflows/CI/badge.svg)
 
 # json-server
 
