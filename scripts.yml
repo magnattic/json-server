@@ -1,0 +1,8 @@
+allow:
+  - net
+  - read
+
+scripts:
+  start:
+    cmd: server.ts ./example/db.json
+  test: deno test server_test.ts
