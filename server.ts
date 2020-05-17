@@ -26,8 +26,16 @@ export const loadDatabase = async (dbPath: string) => {
   return JSON.parse(dbString);
 };
 
-export const jsonServer = async (dbPath: string = './db.json', port = 8000) => {
-  const db = await loadDatabase(dbPath);
+const isString = (value: unknown) =>
+  typeof value === 'string' || value instanceof String;
+
+export const jsonServer = async (
+  dbPathOrObject: string | Object = './db.json',
+  port = 8000
+) => {
+  const db = isString(dbPathOrObject)
+    ? await loadDatabase(dbPathOrObject as string)
+    : dbPathOrObject;
   return listenAndServe({ port }, handleRequest(db));
 };
 
