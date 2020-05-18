@@ -48,8 +48,8 @@ returns the post with id 2
 
 returns the title of post with id 2
 
-## Upcoming features
+## Feature roadmap
 
-- [ ] deliver from db.ts
+- [x] deliver from db.ts
 - [ ] watch mode to update on changes
 - [ ] filter by query params
