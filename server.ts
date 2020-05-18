@@ -1,6 +1,6 @@
 import { ServerRequest } from './deps.ts';
 import { listenAndServe } from './listenAndServe.ts';
-const { readTextFile } = Deno;
+import { loadDatabase } from './data/loadData.ts';
 
 const handleRequest = (db: Record<string, unknown>) => (
   request: ServerRequest
@@ -33,22 +33,11 @@ const handleRequest = (db: Record<string, unknown>) => (
   });
 };
 
-export const loadDatabase = async (dbPath: string) => {
-  const dbString = await readTextFile(dbPath);
-  return JSON.parse(dbString);
-};
-
-const isString = (value: unknown) =>
-  typeof value === 'string' || value instanceof String;
-
 export const jsonServer = async (
   dbPathOrObject: string | Object = './db.json',
   port = 8000
 ) => {
-  console.log(dbPathOrObject);
-  const db = isString(dbPathOrObject)
-    ? await loadDatabase(dbPathOrObject as string)
-    : dbPathOrObject;
+  const db = await loadDatabase(dbPathOrObject);
   return listenAndServe({ port }, handleRequest(db));
 };
 

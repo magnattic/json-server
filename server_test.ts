@@ -1,5 +1,6 @@
-import { jsonServer, loadDatabase } from './server.ts';
+import { jsonServer } from './server.ts';
 import { assertEquals } from './test_deps.ts';
+import { loadDatabase } from './data/loadData.ts';
 
 const { test } = Deno;
 
@@ -9,7 +10,7 @@ const assertJSON = async (actual: Response, expected: unknown) => {
 };
 
 test({
-  name: 'load whole db',
+  name: 'serve a whole json db',
   fn: async () => {
     const db = await loadDatabase('./example/db.json');
     const server = await jsonServer('./example/db.json', 8001);
@@ -35,12 +36,12 @@ test({
 });
 
 test({
-  name: 'load profile from db',
+  name: 'serve a route from json file',
   fn: async () => {
     const server = await jsonServer('./example/db.json');
     const response = await fetch('http://localhost:8000/profile');
 
-    await assertJSON(response, { hello: 'world' });
+    await assertJSON(response, { user: 'magnattic' });
     server.close();
   },
 });

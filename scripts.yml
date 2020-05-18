@@ -5,4 +5,4 @@ allow:
 scripts:
   start:
     cmd: server.ts ./example/db.json
-  test: deno test server_test.ts
+  test: deno test
