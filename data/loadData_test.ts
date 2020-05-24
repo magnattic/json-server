@@ -14,7 +14,7 @@ test({
 test({
   name: 'loads db from typescript file',
   fn: async () => {
-    const db = await loadDatabase('../example/db.ts');
+    const db = await loadDatabase('./example/db.ts');
 
     assertArrayContains(['magnattic', 'stinson'], [db.profile.user]);
   },

@@ -9,7 +9,7 @@ const loadFromPath = async (dbPath: string) => {
     return JSON.parse(dbString);
   }
   if (dbPath.endsWith('.ts')) {
-    const module = await import(dbPath);
+    const module = await import(`file://${Deno.cwd()}/${dbPath}`);
     return module.default || module.db;
   }
 };

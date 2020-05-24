@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "http/": "https://deno.land/std@v0.51.0/http/",
+    "lodash/": "https://deno.land/x/lodash/"
+  }
+}

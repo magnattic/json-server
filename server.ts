@@ -21,7 +21,8 @@ const handleRequest = (db: Record<string, unknown>) => (
       if (routePart && routePart in subDB) {
         return subDB[routePart] as Record<string, unknown>;
       }
-      throw `${routePart} not found in ${JSON.stringify(subDB)}!`;
+      console.error(`${routePart} not found in ${JSON.stringify(subDB)}!`);
+      return subDB;
     },
     db
   );
