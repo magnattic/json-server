@@ -1,6 +1,11 @@
 import { ServerRequest } from './deps.ts';
 import { listenAndServe } from './listenAndServe.ts';
 import { loadDatabase } from './data/loadData.ts';
+import { Evt } from 'evt';
+import { parse } from 'flags/mod.ts';
+import { exists } from 'fs/mod.ts';
+
+export type JsonDB = Record<string, unknown>;
 
 const handleRequest = (db: Record<string, unknown>) => (
   request: ServerRequest
@@ -44,6 +49,27 @@ export const jsonServer = async (
   return server;
 };
 
+export const parseArgs = async () => {
+  const parsedArgs = parse(Deno.args);
+  const dbPath = parsedArgs._[0].toString() || './db.json';
+  if (!(await exists(dbPath))) {
+    console.error(`Invalid database file: ${dbPath} was not found!`);
+    Deno.exit(1);
+  }
+  const watchDB = parsedArgs['watch'] || true;
+  return { dbPath, watchDB };
+};
+
 if (import.meta.main) {
-  jsonServer(Deno.args[0] || './db.json');
+  const { dbPath, watchDB } = await parseArgs();
+  let server = await jsonServer(dbPath);
+  if (watchDB) {
+    const watcher = Deno.watchFs(dbPath);
+    for await (const event of watcher) {
+      if (event.kind === 'modify') {
+        server.close();
+        server = await jsonServer(dbPath);
+      }
+    }
+  }
 }

@@ -5,6 +5,6 @@ imap: import_map.json
 
 scripts:
   start:
-    cmd: deno run --unstable server.ts ./example/db.json
+    cmd: deno run --unstable server.ts ./example/db.json --watch
   test:
     cmd: deno test --unstable

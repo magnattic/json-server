@@ -1,6 +1,9 @@
 {
   "imports": {
     "http/": "https://deno.land/std@v0.56.0/http/",
-    "lodash/": "https://deno.land/x/lodash/"
+    "fs/": "https://deno.land/std@v0.56.0/fs/",
+    "flags/": "https://deno.land/std@v0.56.0/flags/",
+    "lodash/": "https://deno.land/x/lodash/",
+    "evt": "https://deno.land/x/evt/mod.ts"
   }
 }
