@@ -1,10 +1,9 @@
 allow:
   - net
   - read
-imap: import_map.json
 
 scripts:
   start:
-    cmd: deno run --unstable server.ts ./example/db.json --watch
+    cmd: deno run server.ts ./example/db.json --watch
   test:
-    cmd: deno test --unstable
+    cmd: deno test

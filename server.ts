@@ -1,8 +1,6 @@
-import { ServerRequest } from './deps.ts';
+import { ServerRequest, parse, exists } from './deps.ts';
 import { listenAndServe } from './listenAndServe.ts';
 import { loadDatabase } from './data/loadData.ts';
-import { parse } from 'flags/mod.ts';
-import { exists } from 'fs/exists.ts';
 
 export type JsonDB = Record<string, unknown>;
 
@@ -63,6 +61,7 @@ if (import.meta.main) {
   const { dbPath, watchDB } = await parseArgs();
   let server = await jsonServer(dbPath);
   if (watchDB) {
+    console.log(`watching for changes to ${dbPath}...`);
     const watcher = Deno.watchFs(dbPath);
     for await (const event of watcher) {
       if (event.kind === 'modify') {

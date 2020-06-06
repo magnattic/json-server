@@ -48,8 +48,12 @@ returns the post with id 2
 
 returns the title of post with id 2
 
+# Disable watch mode
+
+By default, json-server watches the database file for changes and automatically reloads when you edit it. If you want to disable this, just pass --watch=false.
+
 ## Feature roadmap
 
 - [x] deliver from db.ts
-- [ ] watch mode to update on changes
+- [x] watch mode to update on changes
 - [ ] filter by query params
