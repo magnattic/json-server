@@ -1,9 +1,8 @@
 import { ServerRequest } from './deps.ts';
 import { listenAndServe } from './listenAndServe.ts';
 import { loadDatabase } from './data/loadData.ts';
-import { Evt } from 'evt';
 import { parse } from 'flags/mod.ts';
-import { exists } from 'fs/mod.ts';
+import { exists } from 'fs/exists.ts';
 
 export type JsonDB = Record<string, unknown>;
 
