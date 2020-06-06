@@ -39,7 +39,9 @@ export const jsonServer = async (
   port = 8000
 ) => {
   const db = await loadDatabase(dbPathOrObject);
-  return listenAndServe({ port }, handleRequest(db));
+  const server = listenAndServe({ port }, handleRequest(db));
+  console.log(`JSON server is running on Port ${port}`);
+  return server;
 };
 
 if (import.meta.main) {
