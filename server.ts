@@ -48,7 +48,7 @@ export const jsonServer = async (
 
 export const parseArgs = async () => {
   const parsedArgs = parse(Deno.args);
-  const dbPath = parsedArgs._[0].toString() || './db.json';
+  const dbPath = parsedArgs._[0]?.toString() || './db.json';
   if (!(await exists(dbPath))) {
     console.error(`Invalid database file: ${dbPath} was not found!`);
     Deno.exit(1);

@@ -4,6 +4,6 @@ allow:
 
 scripts:
   start:
-    cmd: deno run server.ts ./example/db.json --watch
+    cmd: deno run server.ts ./example/db.json
   test:
     cmd: deno test
