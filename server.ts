@@ -29,7 +29,11 @@ const handleRequest = (db: Record<string, unknown>) => (
     db
   );
 
-  const headers = new Headers({ 'Content-Type': 'application/json' });
+  const origin = request.headers.get('origin');
+  const headers = new Headers({
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': `${origin}`,
+  });
   request.respond({
     body: JSON.stringify(resource || db, null, 2),
     headers: headers,
