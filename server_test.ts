@@ -12,13 +12,20 @@ const assertJSON = async (actual: Response, expected: unknown) => {
 test({
   name: 'serve a whole json db',
   fn: async () => {
-    const db = await loadDatabase('./example/db.json');
-    const server = await jsonServer('./example/db.json', 8001);
+    let worker: any = null;
+    const db = await loadDatabase('./example/db.json', (newWorker) => {
+      worker = newWorker;
+    });
+    const server = await jsonServer({
+      dbPathOrObject: './example/db.json',
+      port: 8001,
+    });
 
     const response = await fetch('http://localhost:8001');
 
     await assertJSON(response, db);
     server.close();
+    worker !== null && worker.terminate();
   },
 });
 
@@ -26,7 +33,7 @@ test({
   name: 'load a json object db',
   fn: async () => {
     const db = { test: 'epic' };
-    const server = await jsonServer(db);
+    const server = await jsonServer({ dbPathOrObject: db });
 
     const response = await fetch('http://localhost:8000');
 
@@ -38,7 +45,7 @@ test({
 test({
   name: 'serve a route from json file',
   fn: async () => {
-    const server = await jsonServer('./example/db.json');
+    const server = await jsonServer({ dbPathOrObject: './example/db.json' });
     const response = await fetch('http://localhost:8000/profile');
 
     await assertJSON(response, { user: 'magnattic' });
@@ -55,7 +62,7 @@ test({
         { id: 2, title: 'Alice in Denoland' },
       ],
     };
-    const server = await jsonServer(db);
+    const server = await jsonServer({ dbPathOrObject: db });
 
     const response = await fetch('http://localhost:8000/posts/2');
 

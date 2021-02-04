@@ -2,7 +2,7 @@
   "profile": { "user": "magnattic" },
   "posts": [
     { "id": 1, "title": "json-server", "body": "something very long" },
-    { "id": 2, "title": "another one", "body": "this is fun" }
+    { "id": 2, "title": "another one", "body": "this is fundamentally flawed" }
   ],
   "comments": [{ "id": 1, "body": "some comment", "postId": 1 }]
 }

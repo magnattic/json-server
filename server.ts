@@ -1,53 +1,50 @@
-import { ServerRequest, parse, exists } from './deps.ts';
+import { loadDatabaseWithUpdates } from './data/loadData.ts';
+import { exists, parse, ServerRequest } from './deps.ts';
+import { handleRequest } from './handleRequest.ts';
 import { listenAndServe } from './listenAndServe.ts';
-import { loadDatabase } from './data/loadData.ts';
 
 export type JsonDB = Record<string, unknown>;
+export interface Options {
+  dbPathOrObject: string | JsonDB;
+  port: number;
+  watchDB: boolean;
+}
 
-const handleRequest = (db: Record<string, unknown>) => (
-  request: ServerRequest
-) => {
-  const [, ...routePaths] = request.url.split('/');
-
-  const resource = routePaths.reduce<Record<string, unknown>>(
-    (subDB, routePart) => {
-      if (routePart == null || routePart === '') {
-        return subDB;
-      }
-      const id = Number(routePart);
-      if (Array.isArray(subDB) && id !== NaN) {
-        return (subDB as { id: number }[]).find(
-          (item) => item.id === id
-        ) as Record<string, unknown>;
-      }
-      if (routePart && routePart in subDB) {
-        return subDB[routePart] as Record<string, unknown>;
-      }
-      console.error(`${routePart} not found in ${JSON.stringify(subDB)}!`);
-      return subDB;
-    },
-    db
-  );
-
-  const origin = request.headers.get('origin');
-  const headers = new Headers({
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': `${origin}`,
-  });
-  request.respond({
-    body: JSON.stringify(resource || db, null, 2),
-    headers: headers,
-  });
+const defaultOptions: Options = {
+  dbPathOrObject: './db.json',
+  port: 8000,
+  watchDB: true,
 };
 
-export const jsonServer = async (
-  dbPathOrObject: string | Object = './db.json',
-  port = 8000
-) => {
-  const db = await loadDatabase(dbPathOrObject);
-  const server = listenAndServe({ port }, handleRequest(db));
+export const jsonServer = async (options: Partial<Options>) => {
+  console.clear();
+  const { dbPathOrObject, port } = { ...defaultOptions, ...options };
+
+  let handler = (_req: ServerRequest) => {};
+  const server = listenAndServe({ port }, (req) => handler(req));
   console.log(`JSON server is running on Port ${port}`);
-  return server;
+
+  const handleNewDb = (db: Object) => {
+    handler = handleRequest(db as Record<string, unknown>);
+  };
+  let worker: Worker;
+  const onWorkerCreated = (newWorker: Worker) => {
+    worker = newWorker;
+  };
+
+  for await (const db of loadDatabaseWithUpdates(
+    dbPathOrObject,
+    onWorkerCreated
+  )) {
+    handleNewDb(db);
+  }
+
+  return {
+    close: () => {
+      worker?.terminate();
+      server.close();
+    },
+  };
 };
 
 export const parseArgs = async () => {
@@ -58,20 +55,15 @@ export const parseArgs = async () => {
     Deno.exit(1);
   }
   const watchDB = parsedArgs['watch'] || true;
-  return { dbPath, watchDB };
+  const port = parsedArgs['port'] || 8000;
+  return { dbPath, watchDB, port };
 };
 
 if (import.meta.main) {
-  const { dbPath, watchDB } = await parseArgs();
-  let server = await jsonServer(dbPath);
-  if (watchDB) {
-    console.log(`watching for changes to ${dbPath}...`);
-    const watcher = Deno.watchFs(dbPath);
-    for await (const event of watcher) {
-      if (event.kind === 'modify') {
-        server.close();
-        server = await jsonServer(dbPath);
-      }
-    }
-  }
+  const cliArgs = await parseArgs();
+  await jsonServer({
+    dbPathOrObject: cliArgs.dbPath,
+    port: cliArgs.port,
+    watchDB: cliArgs.watchDB,
+  });
 }

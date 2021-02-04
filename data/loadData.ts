@@ -1,22 +1,51 @@
-const { readTextFile } = Deno;
+import { brightGreen } from '../deps.ts';
 
-const isString = (value: unknown) =>
+const isString = (value: unknown): value is string =>
   typeof value === 'string' || value instanceof String;
 
-const loadFromPath = async (dbPath: string) => {
-  if (dbPath.endsWith('.json')) {
-    const dbString = await readTextFile(dbPath);
-    return JSON.parse(dbString);
+export const loadDatabase = (
+  dbPathOrObject: string | Object,
+  onWorkerCreated: (worker: Worker) => void
+) => {
+  console.log('yes');
+  if (isString(dbPathOrObject)) {
+    const worker = new Worker(new URL('worker.ts', import.meta.url).href, {
+      type: 'module',
+      deno: true,
+    });
+    onWorkerCreated(worker);
+    const waitForWorker = new Promise<Object>((resolve, reject) => {
+      worker.onmessage = (e) => {
+        resolve(e.data as Object);
+      };
+      worker.onerror = reject;
+    });
+    worker.postMessage(dbPathOrObject);
+    waitForWorker.then((x) => console.log('worker reloaded database'));
+    return waitForWorker;
   }
-  if (dbPath.endsWith('.ts')) {
-    const module = await import(`file://${Deno.cwd()}/${dbPath}`);
-    return module.default || module.db;
-  }
+  return Promise.resolve(dbPathOrObject);
 };
 
-export const loadDatabase = async (dbPathOrObject: string | Object) => {
-  if (isString(dbPathOrObject)) {
-    return await loadFromPath(dbPathOrObject as string);
+async function* onDbChange(dbPath: string) {
+  console.log(brightGreen(`Watching for changes to ${dbPath}...`));
+  const watcher = Deno.watchFs(dbPath);
+  for await (const ev of watcher) {
+    console.log(ev);
+    if (ev.kind === 'modify') {
+      yield;
+    }
   }
-  return dbPathOrObject;
-};
+}
+
+export async function* loadDatabaseWithUpdates(
+  dbPathOrObject: string | Object,
+  onWorkerCreated: (worker: Worker) => void
+) {
+  yield await loadDatabase(dbPathOrObject, onWorkerCreated);
+  if (isString(dbPathOrObject)) {
+    for await (const x of onDbChange(dbPathOrObject)) {
+      yield await loadDatabase(dbPathOrObject, onWorkerCreated);
+    }
+  }
+}

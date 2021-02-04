@@ -34,3 +34,9 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run tests
         run: deno test --allow-net --allow-read
+
+      - name: Test deno install
+        run:
+          - deno install --allow-read --allow-net --allow-write --unstable -f -n json-server ./server.ts
+          - cd ./example
+          - json-server db.json

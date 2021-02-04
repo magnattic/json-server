@@ -4,6 +4,8 @@ allow:
 
 scripts:
   start:
-    cmd: deno run server.ts ./example/db.json
+    cmd: deno run --unstable server.ts ./example/db.json
+  start-ts:
+    cmd: deno run --unstable server.ts ./example/db.ts
   test:
-    cmd: deno test
+    cmd: deno test --unstable
