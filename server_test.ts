@@ -13,9 +13,7 @@ test({
   name: 'serve a whole json db',
   fn: async () => {
     let worker: any = null;
-    const db = await loadDatabase('./example/db.json', (newWorker) => {
-      worker = newWorker;
-    });
+    const db = await loadDatabase('./example/db.json');
     const server = await jsonServer({
       dbPathOrObject: './example/db.json',
       port: 8001,

@@ -11,7 +11,7 @@ interface TestDb {
 test({
   name: 'loads db from json file',
   fn: async () => {
-    const db = (await loadDatabase('./example/db.json', () => {})) as TestDb;
+    const db = await loadDatabase<TestDb>('./example/db.json');
 
     assertEquals(db.profile, { user: 'magnattic' });
   },
@@ -20,7 +20,7 @@ test({
 test({
   name: 'loads db from typescript file',
   fn: async () => {
-    const db = (await loadDatabase('./example/db.ts', () => {})) as TestDb;
+    const db = await loadDatabase<TestDb>('./example/db.ts');
 
     assertArrayIncludes(['magnattic', 'stinson'], [db.profile.user]);
   },
@@ -31,7 +31,7 @@ test({
   fn: async () => {
     const dbObj = { geronimo: 'jack' };
 
-    const db = (await loadDatabase(dbObj, () => {})) as TestDb;
+    const db = await loadDatabase(dbObj);
 
     assertEquals(db, dbObj);
   },

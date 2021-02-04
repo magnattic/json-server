@@ -3,39 +3,42 @@ import { watchDb } from './watchDb.ts';
 const isString = (value: unknown): value is string =>
   typeof value === 'string' || value instanceof String;
 
-export const loadDatabase = (
-  dbPathOrObject: string | Object,
-  signal: AbortSignal
+export const loadDatabase = async <T>(
+  dbPathOrObject: string | T,
+  options?: Partial<{ signal: AbortSignal }>
 ) => {
   if (isString(dbPathOrObject)) {
     const worker = new Worker(new URL('worker.ts', import.meta.url).href, {
       type: 'module',
       deno: true,
     });
-    signal.addEventListener('abort', () => {
+    options?.signal?.addEventListener('abort', () => {
       worker?.terminate();
-      console.log('killing the worker');
+      console.log('Terminated the worker early.');
     });
-    const waitForWorker = new Promise<Object>((resolve, reject) => {
+    const waitForWorker = new Promise<T>((resolve, reject) => {
       worker.onmessage = (e) => {
-        resolve(e.data as Object);
+        resolve(e.data as T);
       };
       worker.onerror = reject;
     });
     worker.postMessage(dbPathOrObject);
-    return waitForWorker;
+    const result = await waitForWorker;
+    worker?.terminate();
+    return result;
   }
-  return Promise.resolve(dbPathOrObject);
+  return dbPathOrObject;
 };
 
-export async function* loadDatabaseWithUpdates(
-  dbPathOrObject: string | Object,
-  signal: AbortSignal
+export async function* loadDatabaseWithUpdates<T>(
+  dbPath: string,
+  options?: Partial<{ signal: AbortSignal }>
 ) {
-  yield await loadDatabase(dbPathOrObject, signal);
-  if (isString(dbPathOrObject)) {
-    for await (const _event of watchDb(dbPathOrObject, signal)) {
-      yield await loadDatabase(dbPathOrObject, signal);
-    }
+  const signal = options?.signal;
+
+  yield await loadDatabase<T>(dbPath, { signal });
+
+  for await (const _event of watchDb(dbPath, { signal })) {
+    yield await loadDatabase<T>(dbPath, { signal });
   }
 }

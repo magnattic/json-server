@@ -56,4 +56,6 @@ By default, json-server watches the database file for changes and automatically 
 
 - [x] deliver from db.ts
 - [x] watch mode to update on changes
+- [ ] deliver static files
+- [ ] routing
 - [ ] filter by query params
