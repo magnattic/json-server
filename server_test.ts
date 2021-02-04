@@ -12,18 +12,17 @@ const assertJSON = async (actual: Response, expected: unknown) => {
 test({
   name: 'serve a whole json db',
   fn: async () => {
-    let worker: any = null;
     const db = await loadDatabase('./example/db.json');
     const server = await jsonServer({
       dbPathOrObject: './example/db.json',
       port: 8001,
+      watchDB: false,
     });
 
     const response = await fetch('http://localhost:8001');
 
     await assertJSON(response, db);
     server.close();
-    worker !== null && worker.terminate();
   },
 });
 
