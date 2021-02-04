@@ -33,7 +33,7 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Run tests
-        run: deno test --allow-net --allow-read
+        run: deno test --allow-net --allow-read --unstable
 
       - name: Test deno install
         run: |
