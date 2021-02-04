@@ -27,22 +27,21 @@ export const jsonServer = async (options: Partial<Options>) => {
   const handleNewDb = (db: Object) => {
     handler = handleRequest(db as Record<string, unknown>);
   };
-  let worker: Worker;
-  const onWorkerCreated = (newWorker: Worker) => {
-    worker = newWorker;
-  };
+  const aborter = new AbortController();
+  const { signal } = aborter;
 
-  for await (const db of loadDatabaseWithUpdates(
-    dbPathOrObject,
-    onWorkerCreated
-  )) {
-    handleNewDb(db);
-  }
+  const run = async () => {
+    for await (const db of loadDatabaseWithUpdates(dbPathOrObject, signal)) {
+      handleNewDb(db);
+    }
+  };
+  await run();
 
   return {
     close: () => {
-      worker?.terminate();
+      aborter.abort();
       server.close();
+      console.log('Server was closed.');
     },
   };
 };

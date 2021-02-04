@@ -1,19 +1,21 @@
-import { brightGreen } from '../deps.ts';
+import { watchDb } from './watchDb.ts';
 
 const isString = (value: unknown): value is string =>
   typeof value === 'string' || value instanceof String;
 
 export const loadDatabase = (
   dbPathOrObject: string | Object,
-  onWorkerCreated: (worker: Worker) => void
+  signal: AbortSignal
 ) => {
-  console.log('yes');
   if (isString(dbPathOrObject)) {
     const worker = new Worker(new URL('worker.ts', import.meta.url).href, {
       type: 'module',
       deno: true,
     });
-    onWorkerCreated(worker);
+    signal.addEventListener('abort', () => {
+      worker?.terminate();
+      console.log('killing the worker');
+    });
     const waitForWorker = new Promise<Object>((resolve, reject) => {
       worker.onmessage = (e) => {
         resolve(e.data as Object);
@@ -21,31 +23,19 @@ export const loadDatabase = (
       worker.onerror = reject;
     });
     worker.postMessage(dbPathOrObject);
-    waitForWorker.then((x) => console.log('worker reloaded database'));
     return waitForWorker;
   }
   return Promise.resolve(dbPathOrObject);
 };
 
-async function* onDbChange(dbPath: string) {
-  console.log(brightGreen(`Watching for changes to ${dbPath}...`));
-  const watcher = Deno.watchFs(dbPath);
-  for await (const ev of watcher) {
-    console.log(ev);
-    if (ev.kind === 'modify') {
-      yield;
-    }
-  }
-}
-
 export async function* loadDatabaseWithUpdates(
   dbPathOrObject: string | Object,
-  onWorkerCreated: (worker: Worker) => void
+  signal: AbortSignal
 ) {
-  yield await loadDatabase(dbPathOrObject, onWorkerCreated);
+  yield await loadDatabase(dbPathOrObject, signal);
   if (isString(dbPathOrObject)) {
-    for await (const x of onDbChange(dbPathOrObject)) {
-      yield await loadDatabase(dbPathOrObject, onWorkerCreated);
+    for await (const _event of watchDb(dbPathOrObject, signal)) {
+      yield await loadDatabase(dbPathOrObject, signal);
     }
   }
 }
