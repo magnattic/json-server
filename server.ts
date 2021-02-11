@@ -4,6 +4,7 @@ import { handleRequest } from './handleRequest.ts';
 import { listenAndServe } from './listenAndServe.ts';
 
 export type JsonDB = Record<string, unknown>;
+export type RewriteRules = Record<string, string[]>;
 
 const isString = (value: unknown) =>
   typeof value === 'string' || value instanceof String;
@@ -12,16 +13,21 @@ export interface Options {
   dbPathOrObject: string | JsonDB;
   port: number;
   watchDB: boolean;
+  rewriteRules: RewriteRules;
 }
 
 const defaultOptions: Options = {
   dbPathOrObject: './db.json',
   port: 8000,
   watchDB: true,
+  rewriteRules: { yolo: ['profile', 'user'] },
 };
 
 export const jsonServer = async (options: Partial<Options>) => {
-  const { dbPathOrObject, port, watchDB } = { ...defaultOptions, ...options };
+  const { dbPathOrObject, port, watchDB, rewriteRules } = {
+    ...defaultOptions,
+    ...options,
+  };
 
   let handler = (req: ServerRequest) => {
     req.respond({ body: 'loading...' });
@@ -29,8 +35,8 @@ export const jsonServer = async (options: Partial<Options>) => {
   const server = listenAndServe({ port }, (req) => handler(req));
   console.log(`JSON server is running on Port ${port}`);
 
-  const handleNewDb = (db: Object) => {
-    handler = handleRequest(db as Record<string, unknown>);
+  const handleNewDb = (db: JsonDB) => {
+    handler = handleRequest(db, rewriteRules);
   };
   const aborter = new AbortController();
   const { signal } = aborter;
@@ -80,7 +86,7 @@ if (import.meta.main) {
     port: cliArgs.port,
     watchDB: cliArgs.watchDB,
   });
-  if (cliArgs) {
+  if (cliArgs.testRun) {
     console.log('testRun flag detected, closing the server...');
     await new Promise((resolve) => setTimeout(resolve, 1000));
     server.close();

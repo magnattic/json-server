@@ -11,4 +11,5 @@ export { extname } from 'https://deno.land/std@0.85.0/path/mod.ts';
 export { brightGreen } from 'https://deno.land/std@0.85.0/fmt/colors.ts';
 export type { Evt } from 'https://deno.land/x/evt/mod.ts';
 import sample from 'https://dev.jspm.io/lodash-es/sample';
-export { sample };
+import isEqual from 'https://dev.jspm.io/lodash-es/isEqual';
+export { sample, isEqual };

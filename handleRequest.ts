@@ -1,29 +1,21 @@
 import { ServerRequest } from './deps.ts';
+import { findPathInDb } from './findPathInDb.ts';
+import { JsonDB, RewriteRules } from './server.ts';
 
-export const handleRequest = (db: Record<string, unknown>) => (
+export const handleRequest = (db: JsonDB, rewriteRules?: RewriteRules) => (
   request: ServerRequest
 ) => {
   const [, ...routePaths] = request.url.split('/');
+  const isFile = routePaths[routePaths.length - 1].includes('.');
+  if (isFile) {
+    request.respond({
+      status: 404,
+      body: 'Files are not yet handled',
+    });
+    return;
+  }
 
-  const resource = routePaths.reduce<Record<string, unknown>>(
-    (subDB, routePart) => {
-      if (routePart == null || routePart === '') {
-        return subDB;
-      }
-      const id = Number(routePart);
-      if (Array.isArray(subDB) && id !== NaN) {
-        return (subDB as { id: number }[]).find(
-          (item) => item.id === id
-        ) as Record<string, unknown>;
-      }
-      if (routePart && routePart in subDB) {
-        return subDB[routePart] as Record<string, unknown>;
-      }
-      console.error(`${routePart} not found in ${JSON.stringify(subDB)}!`);
-      return subDB;
-    },
-    db
-  );
+  const resource = findPathInDb(db, routePaths, rewriteRules);
 
   const origin = request.headers.get('origin');
   const headers = new Headers({
