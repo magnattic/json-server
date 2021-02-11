@@ -1,3 +1,3 @@
 import { jsonServer } from './server.ts';
 
-jsonServer('./db.json');
+jsonServer({ dbPathOrObject: './db.json' });

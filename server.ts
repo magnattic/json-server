@@ -23,7 +23,9 @@ const defaultOptions: Options = {
 export const jsonServer = async (options: Partial<Options>) => {
   const { dbPathOrObject, port, watchDB } = { ...defaultOptions, ...options };
 
-  let handler = (_req: ServerRequest) => {};
+  let handler = (req: ServerRequest) => {
+    req.respond({ body: 'loading...' });
+  };
   const server = listenAndServe({ port }, (req) => handler(req));
   console.log(`JSON server is running on Port ${port}`);
 
@@ -33,6 +35,9 @@ export const jsonServer = async (options: Partial<Options>) => {
   const aborter = new AbortController();
   const { signal } = aborter;
 
+  const db = await loadDatabase(dbPathOrObject, { signal });
+  handleNewDb(db);
+
   const run = async () => {
     if (watchDB && isString(dbPathOrObject)) {
       const dbPath = dbPathOrObject as string;
@@ -41,9 +46,6 @@ export const jsonServer = async (options: Partial<Options>) => {
       })) {
         handleNewDb(db);
       }
-    } else {
-      const db = await loadDatabase(dbPathOrObject);
-      handleNewDb(db);
     }
   };
   run();

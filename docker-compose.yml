@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  deno:
+    image: "json-server:0.0.1"
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app 
