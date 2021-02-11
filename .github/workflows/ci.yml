@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        deno: [1.2.0, 1.7.1]
+        deno: [1.7.1]
     name: Deno ${{ matrix.deno }}
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
