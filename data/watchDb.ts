@@ -9,7 +9,6 @@ export async function* watchDb(
   const watcher = Deno.watchFs(dbPath);
   !signal?.aborted &&
     signal?.addEventListener('abort', () => {
-      console.log('killing fs watcher!');
       watcher.return?.();
     });
   for await (const event of watcher) {

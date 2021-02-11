@@ -14,7 +14,6 @@ export const loadDatabase = async <T>(
     });
     options?.signal?.addEventListener('abort', () => {
       worker?.terminate();
-      console.log('Terminated the worker early.');
     });
     const waitForWorker = new Promise<T>((resolve, reject) => {
       worker.onmessage = (e) => {

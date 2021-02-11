@@ -68,15 +68,21 @@ export const parseArgs = async () => {
   }
   const watchDB = parsedArgs['watch'] || true;
   const port = parsedArgs['port'] || 8000;
-  return { dbPath, watchDB, port };
+  const testRun = parsedArgs['testRun'] || false;
+  return { dbPath, watchDB, port, testRun };
 };
 
 if (import.meta.main) {
   console.clear();
   const cliArgs = await parseArgs();
-  await jsonServer({
+  const server = await jsonServer({
     dbPathOrObject: cliArgs.dbPath,
     port: cliArgs.port,
     watchDB: cliArgs.watchDB,
   });
+  if (cliArgs) {
+    console.log('testRun flag detected, closing the server...');
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    server.close();
+  }
 }

@@ -39,4 +39,4 @@ jobs:
         run: |
           deno install --allow-read --allow-net --allow-write --unstable -f -n json-server ./server.ts
           cd ./example
-          json-server db.json
+          json-server --testRun db.json
