@@ -11,6 +11,7 @@ export async function* watchDb(
     signal?.addEventListener('abort', () => {
       watcher.return?.();
     });
+  if (signal?.aborted) return;
   for await (const event of watcher) {
     console.log(event);
     if (event.kind === 'modify') {
