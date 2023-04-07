@@ -18,7 +18,7 @@ export const findPathInDb = (
       return subDB;
     }
     const id = Number(routePart);
-    if (Array.isArray(subDB) && id !== NaN) {
+    if (Array.isArray(subDB) && !Number.isNaN(id)) {
       return (subDB as { id: number }[]).find(
         (item) => item.id === id
       ) as Record<string, unknown>;
